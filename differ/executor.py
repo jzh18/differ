@@ -350,9 +350,9 @@ class Executor:
             logger.info('running the binary in the host machine')
             args = [target] + shlex.split(trace.arguments)
         else:
-            target=f'docker run --rm -v {cwd}:/workdir -w /workdir {trace.image_name} {trace.binary.name}'
-            logger.info(f'running the binary in the docker container: {target}')
+            target=f'docker run -i --rm -v {cwd}:/workdir -v /home/ubuntu/repos/file_level_bloat:/home/ubuntu/repos/file_level_bloat -w /workdir {trace.image_name} {project.original.absolute().as_posix()}'
             args = shlex.split(target) + shlex.split(trace.arguments)
+            logger.info(f'running the binary in the docker container: {" ".join(args)}')
         trace.process = subprocess.Popen(
             args,
             cwd=str(cwd),
