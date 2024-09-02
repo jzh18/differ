@@ -1,10 +1,11 @@
 name: date
+image_name: file_level_bloat
 link_filename: date
 version: '8.21'
-original: bin/date.original
+original: /usr/bin/date
 debloaters:
   # The CHISEL binary does not work properly so we compare the original date against itself
-  original: bin/date.original
+  negetiva: /usr/bin/date|negetiva_date_debloated
 
 templates:
   # U, W, V formatting
