@@ -64,6 +64,8 @@ class Project:
 
     #: Unique project name
     name: str
+    # Image name
+    image_name: str
     #: Project directory
     directory: Path
     #: Original binary file path
@@ -208,6 +210,7 @@ class Project:
 
         return cls(
             name=body['name'],
+            image_name=body.get('image_name', ''),
             original=original,
             debloaters=debloaters,
             templates=templates,
@@ -625,6 +628,8 @@ class Trace:
     cwd: Path
     #: The debloater engine used on the binary
     debloater_engine: str
+    # Image name
+    image_name: str = ''
     #: The command line arguments
     arguments: str = ''
     #: The subprocess

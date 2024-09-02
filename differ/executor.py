@@ -181,7 +181,7 @@ class Executor:
         context.save(context_dir / 'context.yml')
 
         # First, run the original trace and verify it worked as expected
-        original_trace = self.create_trace(project, context, project.original, '__original__')
+        original_trace = self.create_trace(project, context, project.original, '__original__', project.image_name)
         self.run_trace(project, original_trace)
         if crash := self.check_original_trace(project, original_trace):
             # The original did not behave as we expected and we can't trust the results of the
@@ -192,7 +192,14 @@ class Executor:
         error_count = 0
         # Run each debloated binary and compare it against the original
         for debloater in project.debloaters.values():
-            trace = self.create_trace(project, context, debloater.binary, debloater.engine)
+            binary_values=debloater.binary.absolute().as_posix().split("|")
+            if len(binary_values)==2:
+                binary, image_name = binary_values
+            else:
+                binary = binary_values[0]
+                image_name = ""
+            binary = Path(binary)
+            trace = self.create_trace(project, context, binary, debloater.engine, image_name)
             self.run_trace(project, trace)
 
             results = self.compare_trace(project, original_trace, trace)
@@ -309,13 +316,16 @@ class Executor:
         # generate the setup and teardown scripts, if specified
         self.write_hook_scripts(trace)
 
-        if project.link_filename:
-            # link the binary to the link_filename
-            link = trace.cwd / project.link_filename
-            link.symlink_to(trace.binary)
-            target = f'./{project.link_filename}'
-        else:
-            target = f'./{trace.binary.name}'
+        if trace.image_name=="":
+            if project.link_filename:
+                # link the binary to the link_filename
+                link = trace.cwd / project.link_filename
+                link.symlink_to(trace.binary)
+                target = f'./{project.link_filename}'
+            else:
+                target = f'./{trace.binary.name}'
+        else: # execute the binary in the docker container, ignore the link_filename
+            pass
 
         # link the 'current_trace' directory to the trace cwd so that paths are uniform
         cwd = trace.cwd.parent / 'current_trace'
@@ -336,7 +346,13 @@ class Executor:
 
         # start the binary
         logger.debug('launching trace %s with arguments: %s', trace, repr(trace.arguments))
-        args = [target] + shlex.split(trace.arguments)
+        if trace.image_name=="":
+            logger.info('running the binary in the host machine')
+            args = [target] + shlex.split(trace.arguments)
+        else:
+            target=f'docker run --rm -v {cwd}:/workdir -w /workdir {trace.image_name} {trace.binary.name}'
+            logger.info(f'running the binary in the docker container: {target}')
+            args = shlex.split(target) + shlex.split(trace.arguments)
         trace.process = subprocess.Popen(
             args,
             cwd=str(cwd),
@@ -597,7 +613,7 @@ class Executor:
         return results
 
     def create_trace(
-        self, project: Project, context: TraceContext, binary: Path, debloater_engine: str
+        self, project: Project, context: TraceContext, binary: Path, debloater_engine: str, image_name=""
     ) -> Trace:
         """
         Create a trace for a single binary. This creates the trace directory and links the binary
@@ -620,7 +636,7 @@ class Executor:
         link = cwd / binary.name
         link.symlink_to(binary)
 
-        trace = Trace(link, context, cwd, debloater_engine)
+        trace = Trace(link, context, cwd, debloater_engine, image_name=image_name)
         trace.arguments = context.template.arguments_template.render(trace=trace, **context.values)
 
         return trace

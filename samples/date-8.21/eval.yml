@@ -1,11 +1,9 @@
 name: date
 link_filename: date.symlink
 version: '8.21'
-original: ../../debloater-eval.batch2/debloater-eval-binaries/benchmarks/low/date-8.21/binaries/64/date
+original: bin/date.my
 debloaters:
-  chisel-2: ../../debloater-eval.batch2/debloater-eval-binaries/benchmarks-debloated/low/date/chisel-2-binaries/date
-  gtirb-dynamic: ../../debloater-eval.batch2/debloater-eval-binaries/benchmarks-debloated/low/date/gtirb-dynamic/date.reduced
-  gtirb-static: ../../debloater-eval.batch2/debloater-eval-binaries/benchmarks-debloated/low/date/gtirb-to-static/date.reduced
+  negetiva: bin/date.mydebloat
 
 templates:
   # U, W, V formatting
