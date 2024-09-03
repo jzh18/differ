@@ -350,7 +350,11 @@ class Executor:
             logger.info('running the binary in the host machine')
             args = [target] + shlex.split(trace.arguments)
         else:
-            target=f'docker run -i --rm --network host -v {cwd}:/workdir -v /home/ubuntu/repos/file_level_bloat:/home/ubuntu/repos/file_level_bloat -w /workdir {trace.image_name} {project.original.absolute().as_posix()}'
+            # for imagemagick, we need to set the environment variables
+            ld_library_path = "/home/ubuntu/repos/file_level_bloat/experiment/workloads/repos/debloater-eval/benchmarks/benchmarks/high/imagemagick-7.0.1-0/binaries/64"
+            magick_config_path="/home/ubuntu/repos/file_level_bloat/experiment/workloads/repos/debloater-eval/benchmarks/benchmarks/high/imagemagick-7.0.1-0/binaries/64"
+
+            target=f'docker run -i --rm --network host -e LD_LIBRARY_PATH={ld_library_path} -e MAGICK_CONFIGURE_PATH={magick_config_path} -v {cwd}:/workdir -v /home/ubuntu/repos/file_level_bloat:/home/ubuntu/repos/file_level_bloat -w /workdir {trace.image_name} {project.original.absolute().as_posix()}'
             args = shlex.split(target) + shlex.split(trace.arguments)
             logger.info(f'running the binary in the docker container: {" ".join(args)}')
         trace.process = subprocess.Popen(
