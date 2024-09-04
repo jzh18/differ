@@ -354,6 +354,12 @@ class Executor:
             ld_library_path = "/home/ubuntu/repos/file_level_bloat/experiment/workloads/repos/debloater-eval/benchmarks/benchmarks/high/imagemagick-7.0.1-0/binaries/64"
             magick_config_path="/home/ubuntu/repos/file_level_bloat/experiment/workloads/repos/debloater-eval/benchmarks/benchmarks/high/imagemagick-7.0.1-0/binaries/64"
 
+            # for poppler
+            ld_library_path=ld_library_path+":/home/ubuntu/repos/file_level_bloat/experiment/workloads/repos/debloater-eval/benchmarks/benchmarks/high/poppler-0.60/binaries/64/"
+
+            # for nmap
+            ld_library_path=ld_library_path+":/home/ubuntu/repos/file_level_bloat/experiment/workloads/repos/debloater-eval/benchmarks/benchmarks/high/nmap-7.93/binaries/64/nmap"
+
             target=f'docker run -i --rm --network host -e LD_LIBRARY_PATH={ld_library_path} -e MAGICK_CONFIGURE_PATH={magick_config_path} -v {cwd}:/workdir -v /home/ubuntu/repos/file_level_bloat:/home/ubuntu/repos/file_level_bloat -w /workdir {trace.image_name} {project.original.absolute().as_posix()}'
             args = shlex.split(target) + shlex.split(trace.arguments)
             logger.info(f'running the binary in the docker container: {" ".join(args)}')
