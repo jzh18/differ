@@ -1,9 +1,9 @@
 name: nginx
 version: '1.18.0'
-image_name: debloat_debloater_eval_nginx
+image_name: file_level_bloat
 original: /home/ubuntu/repos/file_level_bloat/experiment/workloads/repos/debloater-eval/benchmarks/benchmarks/high/nginx-1.23.3/binaries/64/nginx
 debloaters:
-  negetiva: /home/ubuntu/repos/file_level_bloat/experiment/workloads/repos/debloater-eval/benchmarks/benchmarks/high/nginx-1.23.3/binaries/64/nginx|debloat_debloater_eval_nginx_negetiva
+  negetiva: /home/ubuntu/repos/file_level_bloat/experiment/workloads/repos/debloater-eval/benchmarks/benchmarks/high/nginx-1.23.3/binaries/64/nginx|file_level_bloat
 
 templates:
   - name: file_server-download
@@ -22,7 +22,7 @@ templates:
 
     comparators:
       - stdout
-      # - stderr
+      # - stderr # comment out stderr because nginx always complain missing error.log
       - exit_code
       - id: concurrent_script
         output: false
@@ -146,7 +146,7 @@ templates:
   # htaccess
   # proxy to python web server
   - name: reverse_proxy
-    expect_success: false # This test is expected to fail because when debloating, we didn't include the proxy feature
+    expect_success: false
     summary: Configure nginx to proxy to another web server.
     arguments: -p "{{trace.cwd}}" -c proxy.conf
     input_files:
