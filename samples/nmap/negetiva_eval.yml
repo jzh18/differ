@@ -3,7 +3,7 @@ version: '7.80'
 image_name: file_level_bloat
 original: /home/ubuntu/repos/file_level_bloat/experiment/workloads/repos/debloater-eval/benchmarks/benchmarks/high/nmap-7.93/binaries/64/nmap
 debloaters:
-  negetiva: /home/ubuntu/repos/file_level_bloat/experiment/workloads/repos/debloater-eval/benchmarks/benchmarks/high/nmap-7.93/binaries/64/nmap|debloat_debloater_eval_nmap_negetiva
+  negetiva: /home/ubuntu/repos/file_level_bloat/experiment/workloads/repos/debloater-eval/benchmarks/benchmarks/high/nmap-7.93/binaries/64/nmap|negetiva_nmap
 
 
 templates:
