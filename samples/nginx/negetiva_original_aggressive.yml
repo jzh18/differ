@@ -7,6 +7,7 @@ debloaters:
 
 templates:
   - name: file_server-download
+    expect_success: true
     summary: Configure nginx as a file server and download a file
     arguments: -p "{{trace.cwd}}" -c file_server.conf
     input_files:
@@ -22,7 +23,7 @@ templates:
 
     comparators:
       - stdout
-      # - stderr # comment out stderr because nginx always complain missing error.log
+      # - stderr # nginx logs to stderr that the error log is not found. Both original and debloated versions have this behavior.
       - exit_code
       - id: concurrent_script
         output: false
@@ -33,6 +34,7 @@ templates:
         target: serve-ip/dir1/file1.html
 
   - name: file_server-download-relative
+    expect_success: false
     summary: Configure nginx as a file server and download a file using a dot and dot-dot segment
     arguments: -p "{{trace.cwd}}" -c file_server.conf
     input_files:
@@ -59,6 +61,7 @@ templates:
         target: serve-ip/about.html
 
   - name: file_server-download-index
+    expect_success: false
     summary: Configure nginx as a file server and download a the index.html file
     arguments: -p "{{trace.cwd}}" -c file_server.conf
     input_files:
@@ -85,6 +88,7 @@ templates:
         target: serve-ip/index.html
 
   - name: file_server-404
+    expect_success: true
     summary: Trigger a 404 by trying to download a file that does not exist
     arguments: -p "{{trace.cwd}}" -c file_server.conf
     input_files:
@@ -110,6 +114,7 @@ templates:
 
 
   - name: file_server-vhost
+    expect_success: false
     summary: >
       Configure nginx with two virtual hosts and download a file from each.
     arguments: -p "{{trace.cwd}}" -c file_server_vhost.conf
@@ -171,7 +176,7 @@ templates:
 
     comparators:
       - stdout
-      # - stderr
+      # # - stderr
       - id: concurrent_script
         output: false
         exit_code:
