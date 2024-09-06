@@ -3,10 +3,11 @@ image_name: debloat_debloater_eval_poppler
 original: /home/ubuntu/repos/file_level_bloat/experiment/workloads/repos/debloater-eval/benchmarks/benchmarks/high/poppler-0.60/binaries/64/pdftohtml
 version: '0.86.1'
 debloaters:
-  negetiva: /home/ubuntu/repos/file_level_bloat/experiment/workloads/repos/debloater-eval/benchmarks/benchmarks/high/poppler-0.60/binaries/64/pdftohtml|debloat_debloater_eval_poppler_negetiva
+  negetiva: /home/ubuntu/repos/file_level_bloat/experiment/workloads/repos/debloater-eval/benchmarks/benchmarks/high/poppler-0.60/binaries/64/pdftohtml|debloat_debloater_eval_poppler
 
 templates:
   - name: markdown
+    expect_success: false
     summary: Convert a relatively low complexity PDF that was generated from Markdown text
     input_files:
       - source: input_files/markdown.pdf
@@ -26,6 +27,7 @@ templates:
         filename: markdowns.html
 
   - name: opts-range
+    expect_success: false
     input_files:
       - source: input_files/markdown.pdf
         static: true
@@ -44,6 +46,7 @@ templates:
         filename: markdowns.html
 
   - name: opts-single_doc
+    expect_success: false
     input_files:
       - source: input_files/markdown.pdf
         static: true
@@ -63,6 +66,7 @@ templates:
         filename: markdowns.html
 
   - name: opts-stdout
+    expect_success: false
     input_files:
       - source: input_files/markdown.pdf
         static: true
@@ -84,6 +88,7 @@ templates:
         exists: false
 
   - name: images
+    expect_success: true
     summary: Convert a more complex PDF that contains images
     input_files:
       - source: input_files/BinRec.pdf
@@ -109,6 +114,7 @@ templates:
         filename: BinRec-10_3.jpg
 
   - name: openpdf-corpus
+    expect_success: false
     summary: >
       Run against the openpdf corpus produced by the SafeDocs DARPA program:
       https://corpora.tika.apache.org/base/packaged/pdfs/archive/pdfs_202002/
