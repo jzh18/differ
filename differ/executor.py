@@ -359,8 +359,11 @@ class Executor:
 
             # for nmap
             ld_library_path=ld_library_path+":/home/ubuntu/repos/file_level_bloat/experiment/workloads/repos/debloater-eval/benchmarks/benchmarks/high/nmap-7.93/binaries/64/nmap"
-
-            target=f'docker run -i --rm --network host -e LD_LIBRARY_PATH={ld_library_path} -e MAGICK_CONFIGURE_PATH={magick_config_path} -v {cwd}:/workdir -v /home/ubuntu/repos/file_level_bloat:/home/ubuntu/repos/file_level_bloat -w /workdir {trace.image_name} {project.original.absolute().as_posix()}'
+            # -u 1000:1000 for memcached
+            user=" "
+            if project.name=="memcached":
+                user="-u 1000:1000"
+            target=f'docker run -i --rm --network host -e LD_LIBRARY_PATH={ld_library_path} {user} -e MAGICK_CONFIGURE_PATH={magick_config_path} -v {cwd}:/workdir -v /home/ubuntu/repos/file_level_bloat:/home/ubuntu/repos/file_level_bloat -w /workdir {trace.image_name} {project.original.absolute().as_posix()}'
             args = shlex.split(target) + shlex.split(trace.arguments)
             logger.info(f'running the binary in the docker container: {" ".join(args)}')
         trace.process = subprocess.Popen(
