@@ -348,6 +348,7 @@ class Executor:
         logger.debug('launching trace %s with arguments: %s', trace, repr(trace.arguments))
         if trace.image_name=="":
             logger.info('running the binary in the host machine')
+            logger.info(f'running the binary: {target} {" ".join(shlex.split(trace.arguments))}')
             args = [target] + shlex.split(trace.arguments)
         else:
             # for imagemagick, we need to set the environment variables
@@ -363,7 +364,7 @@ class Executor:
             user=" "
             if project.name=="memcached":
                 user="-u 1000:1000"
-            target=f'docker run -i --rm --network host -e LD_LIBRARY_PATH={ld_library_path} {user} -e MAGICK_CONFIGURE_PATH={magick_config_path} -v {cwd}:/workdir -v /home/ubuntu/repos/file_level_bloat:/home/ubuntu/repos/file_level_bloat -w /workdir {trace.image_name} {project.original.absolute().as_posix()}'
+            target=f'docker run -i --rm --name tmp --network host -e LD_LIBRARY_PATH={ld_library_path} {user} -e MAGICK_CONFIGURE_PATH={magick_config_path} -v {cwd}:/workdir -v /home/ubuntu/repos/file_level_bloat:/home/ubuntu/repos/file_level_bloat -w /workdir {trace.image_name} {project.original.absolute().as_posix()}'
             args = shlex.split(target) + shlex.split(trace.arguments)
             logger.info(f'running the binary in the docker container: {" ".join(args)}')
         trace.process = subprocess.Popen(
@@ -506,6 +507,7 @@ class Executor:
         if running:
             # timeout reached
             logger.warning('process reached timeout; terminating: %s', trace)
+
             trace.process.terminate()
             _, status = os.waitpid(trace.process.pid, 0)
             trace.timed_out = True
@@ -588,7 +590,12 @@ class Executor:
             if running:
                 logger.debug('terminating trace with SIGINT: %s', trace)
                 # The trace is still running, now we terminate it
-                trace.process.send_signal(signal.SIGINT.value)
+                if "bftpd" in trace.binary.name: # bfptd is a special case, we need to kill the docker container. SIGINT does not work
+                    logger.info("terminating the bftpd process")
+                    os.system("docker exec tmp killall bftpd")
+                    os.system("docker stop tmp")
+                else:
+                    trace.process.send_signal(signal.SIGINT.value)
                 # Allow the process 5 seconds to cleanly exit
                 return self._wait_process(trace.process, time.monotonic() + 5.0)
             else:
