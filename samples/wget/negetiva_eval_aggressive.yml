@@ -1,0 +1,124 @@
+name: wget
+original: /home/ubuntu/repos/file_level_bloat/experiment/workloads/repos/debloater-eval/metrics/performance-tests/benchmarks/medium/wget-1.20.3/binaries/64/wget
+image_name: file_level_bloat
+version: '1.20.3'
+debloaters:
+  negetiva: /home/ubuntu/repos/file_level_bloat/experiment/workloads/repos/debloater-eval/metrics/performance-tests/benchmarks/medium/wget-1.20.3/binaries/64/wget|negetiva_wget
+
+templates:
+  - name: protocol-https
+    expect_success: true
+    arguments: --no-config https://digg.com/robots.txt
+    comparators:
+      - stdout
+      - id: exit_code
+        expect: 0
+      - id: file
+        filename: robots.txt
+
+  - name: protocol-http
+    expect_success: false
+    arguments: http://echo.jsontest.com/key/value
+    comparators:
+      - stdout
+      - id: exit_code
+        expect: 0
+      - id: file
+        filename: value
+
+  - name: protocol-ip
+    expect_success: false
+    arguments: "--no-config  --header 'Host: echo.jsontest.com' http://{{'echo.jsontest.com'|gethostbyname}}/key/value"
+    comparators:
+      - stdout
+      - id: exit_code
+        expect: 0
+      - id: file
+        filename: value
+
+  - name: opts-output
+    expect_success: false
+    arguments: --no-config  -O data.json http://echo.jsontest.com/key/value/key2/value2
+    comparators:
+      - stdout
+      - id: exit_code
+        expect: 0
+      - id: file
+        filename: data.json
+
+  - name: opts-timeout_ok
+    expect_success: false
+    timeout: 5
+    arguments: --no-config -T 2 http://echoss.jsontest.com/
+    comparators:
+      - stdout
+      - id: exit_code
+        expect: 4
+
+  - name: get-param
+    expect_success: false
+    arguments: --no-config -O data.json http://md5.jsontest.com/?text=hello_world
+    comparators:
+      - stdout
+      - id: exit_code
+        expect: 0
+      - id: file
+        filename: data.json
+
+  - arguments: --help
+    expect_success: false
+    comparators:
+      - stderr
+      - stdout
+      - exit_code
+
+  - arguments: --version
+    expect_success: false
+    comparators:
+      - stderr
+      - stdout
+      - exit_code
+
+  - arguments: --debug -O data.json http://md5.jsontest.com/?text=hello_world
+    expect_success: false
+    comparators:
+      - stderr
+      - stdout
+      - id: exit_code
+        expect: 0
+      - id: file
+        filename: data.json
+
+  - arguments: --delete-after http://echo.jsontest.com/key/value
+    expect_success: false
+    comparators:
+      - stderr
+      - stdout
+      - id: exit_code
+        expect: 0
+      - id: file
+        filename: value.tmp
+        exists: false
+
+  - arguments: -S -O data.json http://md5.jsontest.com/?text=hello_world
+    expect_success: false
+    comparators:
+      - stderr
+      - stdout
+      - id: exit_code
+        expect: 0
+      - id: file
+        filename: data.json
+
+  - arguments: --spider http://echo.jsontest.com/key/value
+    expect_success: false
+    comparators:
+      - stderr
+      - stdout
+      - id: exit_code
+        expect: 0
+      - id: file
+        filename: value
+        exists: false
+
+# spell-checker:ignore jsontest
