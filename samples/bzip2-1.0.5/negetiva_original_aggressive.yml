@@ -1,0 +1,240 @@
+name: bzip2
+link_filename: bzip2.symlink
+original: /home/ubuntu/repos/file_level_bloat/experiment/workloads/repos/debloater-eval/benchmarks/benchmarks/low/bzip2-1.0.5/binaries/64/bzip2
+image_name: file_level_bloat
+version: '1.0.5'
+debloaters:
+  negetiva: /home/ubuntu/repos/file_level_bloat/experiment/workloads/repos/debloater-eval/benchmarks/benchmarks/low/bzip2-1.0.5/binaries/64/bzip2|file_level_bloat
+
+
+templates:
+  # force compress and output to stdout
+  - name: force-compress-stdin_stdout
+    expect_success: true
+    arguments: -c -f
+    input_files:
+      - source: inputs
+        static: true
+
+    stdin:
+      file: inputs/sample1.ref
+
+    teardown: |
+      cmp $DIFFER_TRACE_STDOUT inputs/sample1.bz2.ref
+
+    comparators:
+      - stdout
+      - stderr
+      - id: exit_code
+        expect: 0
+      - id: teardown_script
+        exit_code:
+          expect: 0
+
+  # output to stdout
+  - name: compress-stdin_stdout
+    expect_success: false
+    arguments: -c
+    input_files:
+      - source: inputs
+        static: true
+
+    stdin:
+      file: inputs/sample1.ref
+
+    teardown: |
+      cmp $DIFFER_TRACE_STDOUT inputs/sample1.bz2.ref
+
+    comparators:
+      - stdout
+      - stderr
+      - id: exit_code
+        expect: 0
+      - id: teardown_script
+        exit_code:
+          expect: 0
+
+  # decompress
+  - name: decompress-stdin_stdout
+    expect_success: false
+    arguments: -d
+    input_files:
+      - source: inputs
+        static: true
+
+    stdin:
+      file: inputs/sample1.bz2.ref
+
+    teardown: |
+      cmp $DIFFER_TRACE_STDOUT inputs/sample1.ref
+
+    comparators:
+      - stdout
+      - stderr
+      - id: exit_code
+        expect: 0
+      - id: teardown_script
+        exit_code:
+          expect: 0
+
+  # overwrite
+  - name: compress-overwrite
+    expect_success: false
+    arguments: -f foo
+    setup: |
+      echo 1234 > foo
+      echo 4567 > foo.bz2
+
+    teardown: |
+      bzcat foo.bz2 > foo.orig
+      echo 1234 > foo
+      cmp foo foo.orig
+
+    comparators:
+      - stdout
+      - stderr
+      - id: exit_code
+        expect: 0
+      - id: teardown_script
+        exit_code:
+          expect: 0
+      - id: file
+        filename: foo.bz2
+
+  # test invalid
+  - name: test-invalid
+    expect_success: false
+    arguments: -t foo
+    setup: |
+      echo 1234 > foo
+
+    comparators:
+      - stdout
+      - stderr
+      - id: exit_code
+        expect: false
+
+  # test valid
+  - name: test-valid
+    expect_success: false
+    arguments: -t inputs/sample1.bz2.ref
+    input_files:
+      - source: inputs
+        static: true
+
+    comparators:
+      - stdout
+      - stderr
+      - id: exit_code
+        expect: 0
+
+  # keep original file
+  - name: compress-keep
+    expect_success: false
+    arguments: -k foo
+    setup: |
+      echo 1234 > foo
+
+    teardown: |
+      bzcat foo.bz2 > foo.extracted
+      cmp foo foo.extracted
+
+    comparators:
+      - stdout
+      - stderr
+      - id: exit_code
+        expect: 0
+      - id: file
+        filename: foo.bz2
+
+  # Unsupported 'version'
+  - name: unsupported-version
+    expect_success: false
+    arguments: -V
+    comparators:
+      - stdout
+      - stderr
+      - id: exit_code
+        expect: 0
+
+  # Unsupported 'license'
+  - name: unsupported-license
+    expect_success: false
+    arguments: -L
+    comparators:
+      - stdout
+      - stderr
+      - id: exit_code
+        expect: 0
+
+  # Unsupported 'best' compress
+  - name: unsupported-best
+    expect_success: false
+    arguments: --best foo
+    setup: |
+      echo 1234 > foo
+
+    teardown: |
+      bzcat foo.bz2 > foo.extracted
+      cmp foo foo.extracted
+
+    comparators:
+      - stdout
+      - stderr
+      - id: exit_code
+        expect: 0
+      - id: file
+        filename: foo.bz2
+
+  # Unsupported '8' compress
+  - name: unsupported-number-compress
+    expect_success: false
+    arguments: -8 foo
+    setup: |
+      echo 1234 > foo
+
+    teardown: |
+      bzcat foo.bz2 > foo.extracted
+      cmp foo foo.extracted
+
+    comparators:
+      - stdout
+      - stderr
+      - id: exit_code
+        expect: 0
+      - id: file
+        filename: foo.bz2
+
+  # Test invalid arguments
+  #
+  # TODO: This template is currently disabled because we don't have a way to emulate a TTY within
+  # differ. See issue #XXX
+  #
+  # - arguments: '{{arg}}'
+  #   variables:
+  #     arg:
+  #       type: str
+  #       values:
+  #         - "-z"
+  #         - "-q"
+  #         - "-v"
+  #         - "-s"
+  #         - "-1"
+  #         - "-2"
+  #         - "-3"
+  #         - "-4"
+  #         - "-5"
+  #         - "-6"
+  #         - "-7"
+  #         - "-8"
+  #         - "-9"
+  #         - "-L"
+  #         - "-V"
+  #   comparators:
+  #     - stdout
+  #     - stderr
+  #     - id: exit_code
+  #       expect: false
+
+
+# spell-checker:ignore bzcat
